@@ -20,6 +20,7 @@ import jcifs.smb.*;
 import java.net.UnknownHostException;
 import java.net.MalformedURLException;
 import java.util.GregorianCalendar;
+import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -139,17 +140,17 @@ public class SmbShell extends NtlmAuthenticator {
                         for( int j = 0; j < list.length; j++ ) {
                             StringBuffer sb = new StringBuffer();
                             Date date = new Date( list[j].lastModified() );
-                            Format.print( System.out, "%-40s", list[j].getName() );
+                            System.out.printf("%-40s", list[j].getName() );
                             sb.append( list[j].isDirectory() ? 'd' : '-' );
                             sb.append( list[j].canRead() ? 'r' : '-' );
                             sb.append( list[j].canWrite() ? 'w' : '-' );
                             sb.append( list[j].isHidden() ? 'h' : '-' );
                             sb.append( list[j].getType() == SmbFile.TYPE_WORKGROUP ? 'g' : '-' );
-                            Format.print( System.out, "%-6s", sb.toString() );
-                            Format.print( System.out, "%10d ", list[j].length() );
+                            System.out.printf("%-6s", sb.toString() );
+                            System.out.printf("%10d ", list[j].length() );
 
                             System.out.print( sdf1.format( date ));
-                            Format.print( System.out, "%3s ", sdf2.format( date ));
+                            System.out.printf("%3s ", sdf2.format( date ));
                             System.out.print( sdf3.format( date ));
                             System.out.println();
                         }
