@@ -23,6 +23,8 @@ import java.io.IOException;
 public class SecurityDescriptor {
 
     public int type;
+    public SID owner_user;
+    public SID owner_group;
     public ACE[] aces;
 
     public SecurityDescriptor() {
@@ -37,9 +39,9 @@ public class SecurityDescriptor {
         bufferIndex++;
         type = ServerMessageBlock.readInt2(buffer, bufferIndex);
         bufferIndex += 2;
-        ServerMessageBlock.readInt4(buffer, bufferIndex); // offset to owner sid
+        owner_user = new SID(buffer, bufferIndex); // offset to owner sid
         bufferIndex += 4;
-        ServerMessageBlock.readInt4(buffer, bufferIndex); // offset to group sid
+        owner_group = new SID(buffer, bufferIndex); // offset to group sid
         bufferIndex += 4;
         ServerMessageBlock.readInt4(buffer, bufferIndex); // offset to sacl
         bufferIndex += 4;
