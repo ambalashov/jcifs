@@ -49,4 +49,8 @@ public class MsrpcShareGetInfo extends srvsvc.ShareGetInfo {
         }
         return null;
     }
+    
+    public srvsvc.ShareInfo502 getShareInfo502() {
+        return (srvsvc.ShareInfo502) info;
+    }
 }

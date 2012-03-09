@@ -23,7 +23,26 @@ import java.io.IOException;
 public class SecurityDescriptor {
     public final static long NO_OFFSET = 0l;
     public final static long DACL_OFFSET = 20l;//DACL_OFFSET  = 2 (revision) + 2 (control) + 4*4 (4*offset)  =  20 bytes
-    public final static long SET_DACL_CONTROL_FLAGS = 0x9407; // 1001 0100 0000 0111 (SR PD DI DP GD OD)
+    
+    // Flag values and description from: http://msdn.microsoft.com/en-us/library/cc230366(v=prot.10).aspx
+    public static final long FLAG_SR = 0x8000;       // SR  Self-Relative
+    public static final long FLAG_RM = 0x4000;       // RM  RM Control Valid
+    public static final long FLAG_PS = 0x2000;       // PS  SACL Protected
+    public static final long FLAG_PD = 0x1000;       // PD  DACL Protected
+    public static final long FLAG_SI = 0x0800;       // SI  SACL Auto-Interited
+    public static final long FLAG_DI = 0x0400;       // DI  DACL Auto-Inherited
+    public static final long FLAG_SC = 0x0200;       // SC  SACL Computed Inheritance Required
+    public static final long FLAG_DC = 0x0100;       // DC  DACL Computed Inheritance Required
+    public static final long FLAG_DT = 0x0080;       // DT  DACL Trusted
+    public static final long FLAG_SS = 0x0040;       // SS  Server Security
+    public static final long FLAG_SD = 0x0020;       // SD  SACL Defaulted
+    public static final long FLAG_SP = 0x0010;       // SP  SACL Present
+    public static final long FLAG_DD = 0x0008;       // DD  DACL Defaulted
+    public static final long FLAG_DP = 0x0004;       // DP  DACL Present
+    public static final long FLAG_GD = 0x0002;       // GD  Group Defaulted
+    public static final long FLAG_OD = 0x0001;       // OD  Owner Defaulted
+    
+    public final static long SET_DACL_CONTROL_FLAGS = FLAG_SR | FLAG_PD | FLAG_DI | FLAG_DP | FLAG_GD | FLAG_OD;
 
     public int type;
     public SID owner_user;
