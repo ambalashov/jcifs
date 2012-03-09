@@ -33,11 +33,19 @@ public class MsrpcShareGetInfo extends srvsvc.ShareGetInfo {
     }
 
     public ACE[] getSecurity() throws IOException {
+        SecurityDescriptor sd = getSecurityDescriptor();
+        if (sd == null) {
+            return null;
+        }
+        return sd.aces;
+    }
+    
+    public SecurityDescriptor getSecurityDescriptor() throws IOException {
         srvsvc.ShareInfo502 info502 = (srvsvc.ShareInfo502)info;
         if (info502.security_descriptor != null) {
             SecurityDescriptor sd;
             sd = new SecurityDescriptor(info502.security_descriptor, 0, info502.sd_size);
-            return sd.aces;
+            return sd;
         }
         return null;
     }

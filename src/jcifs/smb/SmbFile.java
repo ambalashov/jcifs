@@ -2974,5 +2974,49 @@ if (this instanceof SmbNamedPipe) {
     public ACE[] getSecurity() throws IOException {
         return getSecurity(false);
     }
+    
+    /**
+     * Return SecurityDescriptor representing
+     * the share permissions on the share exporting this file or directory.
+     * If no DACL is present, null is returned. If the DACL is empty, an array with 0 elements is returned.
+     * <p>
+     * Note that this is different from calling <tt>getSecurity</tt> on a
+     * share. There are actually two different ACLs for shares - the ACL on
+     * the share and the ACL on the folder being shared.
+     * Go to <i>Computer Management</i>
+     * &gt; <i>System Tools</i> &gt; <i>Shared Folders</i> &gt <i>Shares</i> and
+     * look at the <i>Properties</i> for a share. You will see two tabs - one
+     * for "Share Permissions" and another for "Security". These correspond to
+     * the ACLs returned by <tt>getShareSecurity</tt> and <tt>getSecurity</tt>
+     * respectively.
+     * @param resolveSids Attempt to resolve the SIDs within each ACE form
+     * their numeric representation to their corresponding account names.
+     */
+    public SecurityDescriptor getShareSecurityDescriptor(boolean resolveSids) throws IOException {
+        MsrpcShareGetInfo rpc;
+        DcerpcHandle handle;
 
+        resolveDfs(null);
+        String server = getServerWithDfs();
+
+        rpc = new MsrpcShareGetInfo(server, tree.share);
+        handle = DcerpcHandle.getHandle("ncacn_np:" + server + "[\\PIPE\\srvsvc]", auth);
+
+        try {
+            handle.sendrecv(rpc);
+            if (rpc.retval != 0)
+                throw new SmbException(rpc.retval, true);
+            SecurityDescriptor security = rpc.getSecurityDescriptor();
+            if (security != null && security.aces != null)
+                processAces(security.aces, resolveSids);
+            return security;
+        } finally {
+            try {
+                handle.close();
+            } catch(IOException ioe) {
+                if (log.level >= 1)
+                    ioe.printStackTrace(log);
+            }
+        }
+    }
 }
