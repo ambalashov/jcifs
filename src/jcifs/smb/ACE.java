@@ -76,7 +76,7 @@ public class ACE {
     int flags;
     int access;
     SID sid;
-
+    
     /**
      * Returns true if this ACE is an allow ACE and false if it is a deny ACE.
      */
@@ -211,6 +211,23 @@ public class ACE {
             sb.append(' ');
         }
     }
+    
+    public void setAllow(boolean allow) {
+        this.allow = allow;
+    }
+    
+    public void setFlags(int flags) {
+        this.flags = flags;
+    }
+    
+    public void setAccess(int access) {
+        this.access = access;
+    }
+    
+    public void setSid(SID sid) {
+        this.sid = sid;
+    }
+
     /**
      * Return a string represeting this ACE.
      * <p>
