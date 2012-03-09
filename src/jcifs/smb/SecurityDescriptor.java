@@ -94,7 +94,7 @@ public class SecurityDescriptor {
         return bufferIndex - start;
     }
     
-    public byte[] toByteArray() {
+    public byte[] encodeSetDACL() {
         int acesBlockSize = 1 + 1 + 2 + 4;//revision (2) + size (2) + numOfACEs(4)
         for (ACE ace: aces) {
             acesBlockSize += ace.getACESize();

@@ -33,7 +33,7 @@ public class MsrpcShareSetInfo extends srvsvc.ShareSetInfo {
     
     public void setSecurityDescriptor(SecurityDescriptor sd) throws IOException {
         srvsvc.ShareInfo502 info502 = (srvsvc.ShareInfo502)info;
-        byte[] encoded = sd.toByteArray();
+        byte[] encoded = sd.encodeSetDACL();
         info502.security_descriptor = encoded;
         info502.sd_size = encoded.length;
     }

@@ -3019,4 +3019,38 @@ if (this instanceof SmbNamedPipe) {
             }
         }
     }
+    
+    public void setShareSecurity(ACE[] aces) throws IOException {
+        resolveDfs(null);
+        String server = getServerWithDfs();
+
+        MsrpcShareGetInfo getRpc = new MsrpcShareGetInfo(server, tree.share);
+        DcerpcHandle handle = DcerpcHandle.getHandle("ncacn_np:" + server + "[\\PIPE\\srvsvc]", auth);
+
+        try {
+            // Retrieve the current ShareInfo as a template for using with the set operation
+            handle.sendrecv(getRpc);
+            if (getRpc.retval != 0)
+                throw new SmbException(getRpc.retval, true);
+            
+            // Create the set operation using ShareInfo with a new security descriptor
+            MsrpcShareSetInfo setRpc = new MsrpcShareSetInfo(server, tree.share, getRpc.getShareInfo502());
+            SecurityDescriptor sd = new SecurityDescriptor();
+            sd.aces = aces;
+            setRpc.setSecurityDescriptor(sd);
+            
+            handle.sendrecv(setRpc);
+            if (getRpc.retval != 0)
+                throw new SmbException(getRpc.retval, true);
+        }
+        finally {
+            try {
+                handle.close();
+            }
+            catch(IOException ioe) {
+                if (log.level >= 1)
+                    ioe.printStackTrace(log);
+            }
+        }
+    }
 }
