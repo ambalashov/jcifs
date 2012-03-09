@@ -21,6 +21,9 @@ package jcifs.smb;
 import java.io.IOException;
 
 public class SecurityDescriptor {
+    public final static long NO_OFFSET = 0l;
+    public final static long DACL_OFFSET = 20l;//DACL_OFFSET  = 2 (revision) + 2 (control) + 4*4 (4*offset)  =  20 bytes
+    public final static long SET_DACL_CONTROL_FLAGS = 0x9407; // 1001 0100 0000 0111 (SR PD DI DP GD OD)
 
     public int type;
     public SID owner_user;
@@ -71,6 +74,66 @@ public class SecurityDescriptor {
 
         return bufferIndex - start;
     }
+    
+    public byte[] toByteArray() {
+        int acesBlockSize = 1 + 1 + 2 + 4;//revision (2) + size (2) + numOfACEs(4)
+        for (ACE ace: aces) {
+            acesBlockSize += ace.getACESize();
+        }
+        
+        int totalSize = (int) DACL_OFFSET + acesBlockSize;
+        byte[] buf = new byte[totalSize];
+        int index = 0;
+        
+        // Revision
+        buf[index++] = (byte) 0x01;
+
+        // Sbz1
+        buf[index++] = (byte) 0x00; // Sbz1
+
+        // Control
+        ServerMessageBlock.writeInt2(SET_DACL_CONTROL_FLAGS, buf, index);
+        index += 2;
+
+        //-------- writting offsets --------
+
+        //offset owner
+        ServerMessageBlock.writeInt4(NO_OFFSET, buf, index);
+        index += 4;
+
+        //offset group
+        ServerMessageBlock.writeInt4(NO_OFFSET, buf, index);
+        index += 4;
+
+        //offset Sacl
+        ServerMessageBlock.writeInt4(NO_OFFSET, buf, index);
+        index += 4;
+
+        //DACL_OFFSET  = 2 (revision) + 2 (control) + 4*4 (4*offset)  =  20 bytes
+        ServerMessageBlock.writeInt4(DACL_OFFSET, buf, index);
+        index += 4;
+
+        
+        //----------- writing the Dcls --------
+
+        //Revision
+        buf[index++] = (byte) 0x02;
+        buf[index++] = (byte) 0x00;
+
+        ServerMessageBlock.writeInt2(acesBlockSize, buf, index);
+        index += 2;
+
+        ServerMessageBlock.writeInt4(aces.length, buf, index);
+        index += 4;
+
+        for (ACE ace : aces) {
+            int size = ace.encode(buf, index);
+            index += size;
+        }
+        
+        return buf;
+    }
+    
     public String toString() {
         String ret = "SecurityDescriptor:\n";
         if (aces != null) {
