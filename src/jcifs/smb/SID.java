@@ -25,6 +25,7 @@ import java.io.IOException;
 import jcifs.util.Hexdump;
 import jcifs.dcerpc.*;
 import jcifs.dcerpc.msrpc.*;
+import jcifs.dcerpc.msrpc.samr.SamrLookupNamesInDomain;
 
 /**
  * A Windows SID is a numeric identifier used to represent Windows
@@ -638,6 +639,65 @@ synchronized (sid_cache) {
 }
     }
 
+    /**
+     * Look up user SIDs on the domain or server by short username.
+     * 
+     * @param authorityServerName The server from which the local groups will be queried.
+     * @param auth The credentials required to query groups and group members.
+     * @param userNames List of user names to attempt to resolve.
+     * @return Array of sids for the specified users.
+     * @throws IOException
+     */
+    public SID[] lookupUsers(String authorityServerName,
+            NtlmPasswordAuthentication auth,
+            String[] userNames) throws IOException {
+        
+        DcerpcHandle handle = null;
+        SamrPolicyHandle policyHandle = null;
+        SamrDomainHandle domainHandle = null;
+        SID domsid = getDomainSid();
+        
+        synchronized (sid_cache) {
+            try {
+                handle = DcerpcHandle.getHandle("ncacn_np:" + authorityServerName +
+                        "[\\PIPE\\samr]", auth);
+                policyHandle = new SamrPolicyHandle(handle, authorityServerName, 0x00000030);
+                domainHandle = new SamrDomainHandle(handle, policyHandle, 0x00000200, domsid);
+
+                // Convert users into Unicode Strings
+                UnicodeString[] names = new UnicodeString[userNames.length];
+                for (int i = 0; i < names.length; i++) {
+                    names[i] = new UnicodeString(userNames[i], false);
+                }
+                MsrpcSamrLookupNames rpc = new MsrpcSamrLookupNames(domainHandle, names);
+                handle.sendrecv(rpc);
+                if (rpc.retval != 0)
+                    throw new SmbException(rpc.retval, false);
+                
+                // Take the RID values returned and construct SIDs on this domain
+                SID[] sids = new SID[rpc.rids.rids.length];
+                for (int i = 0; i < rpc.rids.rids.length; i++) {
+                    sids[i] = new SID(domsid, rpc.rids.rids[i]);
+                    sids[i].type = rpc.types.rids[i];
+                    sids[i].domainName = domsid.getDomainName();
+                    sids[i].acctName = userNames[i];
+                }
+                return sids;
+            }
+            finally {
+                if (handle != null) {
+                    if (policyHandle != null) {
+                        if (domainHandle != null) {
+                            domainHandle.close();
+                        }
+                        policyHandle.close();
+                    }
+                    handle.close();
+                }
+            }
+        }
+    }
+    
     /**
      * This specialized method returns a Map of users and local groups for the
      * target server where keys are SIDs representing an account and each value
