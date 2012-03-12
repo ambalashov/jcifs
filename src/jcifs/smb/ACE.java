@@ -47,15 +47,15 @@ import java.io.IOException;
 
 public class ACE {
 
-    public static final int FILE_READ_DATA        = 0x00000001; // 1
-    public static final int FILE_WRITE_DATA       = 0x00000002; // 2
-    public static final int FILE_APPEND_DATA      = 0x00000004; // 3
-    public static final int FILE_READ_EA          = 0x00000008; // 4
-    public static final int FILE_WRITE_EA         = 0x00000010; // 5
-    public static final int FILE_EXECUTE          = 0x00000020; // 6
-    public static final int FILE_DELETE           = 0x00000040; // 7
-    public static final int FILE_READ_ATTRIBUTES  = 0x00000080; // 8
-    public static final int FILE_WRITE_ATTRIBUTES = 0x00000100; // 9
+    public static final int FILE_READ_DATA        = 0x00000001; // 0
+    public static final int FILE_WRITE_DATA       = 0x00000002; // 1
+    public static final int FILE_APPEND_DATA      = 0x00000004; // 2
+    public static final int FILE_READ_EA          = 0x00000008; // 3
+    public static final int FILE_WRITE_EA         = 0x00000010; // 4
+    public static final int FILE_EXECUTE          = 0x00000020; // 5
+    public static final int FILE_DELETE           = 0x00000040; // 6
+    public static final int FILE_READ_ATTRIBUTES  = 0x00000080; // 7
+    public static final int FILE_WRITE_ATTRIBUTES = 0x00000100; // 8
     public static final int DELETE                = 0x00010000; // 16
     public static final int READ_CONTROL          = 0x00020000; // 17
     public static final int WRITE_DAC             = 0x00040000; // 18
